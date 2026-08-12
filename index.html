@@ -1,139 +1,366 @@
-<!doctype html>
-<html lang="tr">
+<!DOCTYPE html>
+<html lang="tr" class="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<title>Reklamcı Ajandası</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;background:#f3f4f6;color:#111827}
-header{background:#111827;color:white;padding:22px 18px 18px;position:sticky;top:0;z-index:3}header h1{margin:0;font-size:24px}header p{margin:5px 0 0;color:#9ca3af;font-size:13px}
-main{padding:16px 14px 90px;max-width:760px;margin:auto}.card{background:white;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px #0000000d}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f9fafb;padding:14px;border-radius:14px}.stat b{display:block;font-size:24px;margin-top:4px}
-button,.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:700;background:#111827;color:white;cursor:pointer}.btn.secondary{background:#e5e7eb;color:#111827}.add{width:100%;margin-bottom:12px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:11px;font-size:16px;background:white}textarea{min-height:90px;resize:vertical}label{font-size:12px;font-weight:700;color:#4b5563;display:block;margin:10px 0 5px}
-.job{border:1px solid #e5e7eb;border-radius:14px;padding:13px;margin-top:9px}.jobtop{display:flex;justify-content:space-between;gap:8px}.badge{font-size:11px;padding:5px 8px;border-radius:99px;background:#fef3c7;white-space:nowrap}.muted{color:#6b7280;font-size:13px}.danger{background:#fee2e2;color:#991b1b}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:9px 5px env(safe-area-inset-bottom);z-index:4}nav button{background:none;color:#4b5563;padding:7px 10px;font-size:12px}nav button.active{color:#111827}section{display:none}section.active{display:block}.hidden{display:none}.result{font-size:23px;font-weight:800;margin-top:10px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Reklamcı Ajandası Pro</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  </style>
 </head>
-<body>
-<header><h1>Reklamcı Ajandası</h1><p>İşlerini, ölçülerini ve tasarım notlarını tek yerde tut.</p></header>
-<main>
-<section id="home" class="active">
-<div class="grid"><div class="stat">Toplam İş<b id="total">0</b></div><div class="stat">Açık İş<b id="open">0</b></div></div>
-<button class="add" onclick="show('new')">＋ Yeni İş Ekle</button>
-<div class="card"><input id="search" placeholder="Müşteri veya iş ara..." oninput="renderJobs()"></div>
-<div id="jobs"></div>
-</section>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-12 font-sans select-none">
 
-<section id="new">
-<div class="card">
-<h2>Yeni İş</h2>
-<label>Müşteri adı</label><input id="customer">
-<label>Telefon</label><input id="phone" type="tel">
-<label>İş adı</label><input id="title">
-<label>Teslim tarihi</label><input id="date" type="date">
-<label>Durum</label><select id="status"><option>Bekliyor</option><option>Tasarımda</option><option>Baskıda</option><option>Montajda</option><option>Tamamlandı</option></select>
-</div>
-<div class="card"><h3>Cam Ölçüsü</h3>
-<label>En (cm)</label><input id="w" type="number" inputmode="decimal" oninput="calcForm()">
-<label>Boy (cm)</label><input id="h" type="number" inputmode="decimal" oninput="calcForm()">
-<label>Adet</label><input id="count" type="number" value="1" inputmode="numeric" oninput="calcForm()">
-<label>Cam / folyo türü</label><input id="glass">
-<div class="result" id="area">0,00 m²</div></div>
-<div class="card"><h3>Tasarım Detayları</h3><textarea id="design" placeholder="Renk, yazı, logo, ışık, montaj vb."></textarea>
-<label>Ek notlar</label><textarea id="notes"></textarea></div>
-<button class="add" onclick="saveJob()">Kaydet</button><button class="add btn secondary" onclick="show('home')">Vazgeç</button>
-</section>
+  <!-- Header -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 p-4 sticky top-0 z-20">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-lg font-bold text-amber-500">📱 Reklamcı Ajandası Pro</h1>
+        <p class="text-[10px] text-slate-400">Çoklu Ölçü • Fotoğraflı • Kalıcı Kayıt</p>
+      </div>
+      <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-bold border border-amber-500/30">v2.0</span>
+    </div>
+  </header>
 
-<section id="calc"><div class="card"><h2>m² Hesapla</h2>
-<label>En (cm)</label><input id="cw" type="number" oninput="quickCalc()">
-<label>Boy (cm)</label><input id="ch" type="number" oninput="quickCalc()">
-<label>Adet</label><input id="cc" type="number" value="1" oninput="quickCalc()">
-<div class="result" id="quick">0,00 m²</div></div></section>
+  <main class="max-w-md mx-auto p-4 space-y-5">
 
-<section id="settings"><div class="card"><h2>Ayarlar</h2><p class="muted">Reklamcı Ajandası • Web sürümü</p>
-<button class="btn danger" onclick="if(confirm('Tüm kayıtlar silinsin mi?')){localStorage.removeItem('jobs');renderJobs()}">Tüm kayıtları sil</button></div>
-<div class="card"><h3>Yakında</h3><p>📸 Fotoğraf ekleme</p><p>💰 Maliyet ve kâr</p><p>📄 PDF teklif</p><p>☁️ Yedekleme</p><p>📢 Reklam / Pro sürüm</p></div></section>
-</main>
-<div id="editModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:10;padding:18px;overflow:auto">
-<div class="card" style="max-width:720px;margin:20px auto">
-<h2>İşi Düzenle</h2><input id="editId" type="hidden">
-<label>Müşteri adı</label><input id="ecustomer">
-<label>Telefon</label><input id="ephone" type="tel">
-<label>İş adı</label><input id="etitle">
-<label>Teslim tarihi</label><input id="edate" type="date">
-<label>Durum</label><select id="estatus"><option>Bekliyor</option><option>Tasarımda</option><option>Baskıda</option><option>Montajda</option><option>Tamamlandı</option></select>
-<h3 style="margin-top:18px">Cam Ölçüsü</h3>
-<label>En (cm)</label><input id="ew" type="number" oninput="calcEdit()">
-<label>Boy (cm)</label><input id="eh" type="number" oninput="calcEdit()">
-<label>Adet</label><input id="ecount" type="number" oninput="calcEdit()">
-<label>Cam / folyo türü</label><input id="eglass">
-<div class="result" id="earea">0,00 m²</div>
-<label>Tasarım Detayları</label><textarea id="edesign"></textarea>
-<label>Ek notlar</label><textarea id="enotes"></textarea>
-<div style="display:flex;gap:8px;margin-top:14px">
-<button class="btn" style="flex:1" onclick="updateJob()">Değişiklikleri Kaydet</button>
-<button class="btn secondary" style="flex:1" onclick="closeEdit()">Vazgeç</button>
-</div></div></div>
-<nav><button id="n-home" class="active" onclick="show('home')">⌂<br>İşler</button><button id="n-new" onclick="show('new')">＋<br>Yeni</button><button id="n-calc" onclick="show('calc')">▣<br>Hesap</button><button id="n-settings" onclick="show('settings')">⚙<br>Ayarlar</button></nav>
-<script>
-const $=id=>document.getElementById(id);
-let jobs=JSON.parse(localStorage.getItem('jobs')||'[]');
-function show(id){document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));$('n-'+id).classList.add('active');if(id==='home')renderJobs()}
-function area(w,h,c){return w&&h?Number(w)*Number(h)/10000*(Number(c)||1):0}
-function calcForm(){$('area').textContent=area($('w').value,$('h').value,$('count').value).toFixed(2).replace('.',',')+' m²'}
-function quickCalc(){$('quick').textContent=area($('cw').value,$('ch').value,$('cc').value).toFixed(2).replace('.',',')+' m²'}
-function saveJob(){let j={id:Date.now(),customer:$('customer').value||'İsimsiz Müşteri',phone:$('phone').value,title:$('title').value||'Yeni İş',date:$('date').value,status:$('status').value,w:$('w').value,h:$('h').value,count:$('count').value,glass:$('glass').value,design:$('design').value,notes:$('notes').value};jobs.unshift(j);localStorage.setItem('jobs',JSON.stringify(jobs));['customer','phone','title','date','w','h','glass','design','notes'].forEach(x=>$(x).value='');$('count').value=1;calcForm();show('home')}
-function renderJobs(){
-let q=($('search').value||'').toLowerCase();
-let list=jobs.filter(j=>(j.customer+' '+j.title).toLowerCase().includes(q));
-$('total').textContent=jobs.length;
-$('open').textContent=jobs.filter(j=>j.status!=='Tamamlandı').length;
-$('jobs').innerHTML=list.map(j=>`<div class="card job">
-<div class="jobtop"><div><b>${esc(j.title)}</b><div class="muted">${esc(j.customer)}</div></div><span class="badge">${esc(j.status)}</span></div>
-<p class="muted">Teslim: ${j.date||'Belirtilmedi'} · ${area(j.w,j.h,j.count).toFixed(2)} m²</p>
-${j.design?`<p>${esc(j.design)}</p>`:''}
-<div style="display:flex;gap:8px;margin-top:10px">
-<button class="btn" onclick="editJob(${j.id})">Düzenle</button>
-<button class="btn danger" onclick="del(${j.id})">Sil</button>
-</div></div>`).join('')||'<div class="card muted">Henüz kayıt yok.</div>'
-}
-function editJob(id){
-let j=jobs.find(x=>x.id===id); if(!j)return;
-$('editId').value=j.id;
-$('ecustomer').value=j.customer||'';
-$('ephone').value=j.phone||'';
-$('etitle').value=j.title||'';
-$('edate').value=j.date||'';
-$('estatus').value=j.status||'Bekliyor';
-$('ew').value=j.w||'';
-$('eh').value=j.h||'';
-$('ecount').value=j.count||1;
-$('eglass').value=j.glass||'';
-$('edesign').value=j.design||'';
-$('enotes').value=j.notes||'';
-calcEdit();
-$('editModal').classList.remove('hidden');
-}
-function closeEdit(){$('editModal').classList.add('hidden')}
-function calcEdit(){$('earea').textContent=area($('ew').value,$('eh').value,$('ecount').value).toFixed(2).replace('.',',')+' m²'}
-function updateJob(){
-let id=Number($('editId').value), j=jobs.find(x=>x.id===id); if(!j)return;
-Object.assign(j,{
-customer:$('ecustomer').value||'İsimsiz Müşteri',
-phone:$('ephone').value,
-title:$('etitle').value||'Yeni İş',
-date:$('edate').value,
-status:$('estatus').value,
-w:$('ew').value,h:$('eh').value,count:$('ecount').value,
-glass:$('eglass').value,design:$('edesign').value,notes:$('enotes').value
-});
-localStorage.setItem('jobs',JSON.stringify(jobs));
-closeEdit();renderJobs();
-}
-function del(id){jobs=jobs.filter(j=>j.id!==id);localStorage.setItem('jobs',JSON.stringify(jobs));renderJobs()}
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-renderJobs();
-</script>
-</body></html>
+    <!-- Form -->
+    <section class="bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl space-y-4">
+      <h2 class="text-sm font-bold text-slate-200 border-b border-slate-800 pb-2">➕ Yeni İş Kaydı</h2>
+      
+      <form id="jobForm" onsubmit="saveJob(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Müşteri / Firma Adı</label>
+          <input type="text" id="customer" required placeholder="Örn: Emmioğlu Restoran" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Telefon</label>
+            <input type="tel" id="phone" placeholder="05xx..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">İş Türü</label>
+            <input type="text" id="jobTitle" required placeholder="Örn: Cam Folyosu & Tabela" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Çoklu Ölçü Ekleme Alanı -->
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-amber-400">📐 Cam / Parça Ölçüleri (cm)</span>
+            <button type="button" onclick="addDimensionRow()" class="text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg font-semibold">+ Parça Ekle</button>
+          </div>
+          
+          <div id="dimensionRows" class="space-y-2">
+            <!-- Satırlar JS ile eklenecek -->
+          </div>
+
+          <div class="text-right text-xs font-extrabold text-amber-400 pt-1 border-t border-slate-800">
+            Toplam Alan: <span id="totalSqmResult" class="text-sm">0.00</span> m²
+          </div>
+        </div>
+
+        <!-- Cephe Fotoğrafı Ekleme -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">📷 Cephe / Saha Fotoğrafı</label>
+          <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)" class="hidden">
+          <div class="flex items-center gap-3">
+            <button type="button" onclick="document.getElementById('photoInput').click()" class="bg-slate-800 border border-slate-700 text-xs px-3 py-2.5 rounded-xl font-medium text-slate-200 hover:bg-slate-700">
+              📸 Fotoğraf Çek / Seç
+            </button>
+            <span id="photoStatus" class="text-xs text-slate-400 italic">Fotoğraf seçilmedi</span>
+          </div>
+          <img id="photoPreview" class="mt-2 rounded-xl max-h-40 hidden border border-slate-700 object-cover w-full">
+        </div>
+
+        <!-- Fiyat Hesabı -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Maliyet (₺)</label>
+            <input type="number" id="cost" oninput="calculateProfit()" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Teklif Fiyatı (₺)</label>
+            <input type="number" id="price" oninput="calculateProfit()" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+        <div class="text-right text-xs text-emerald-400 font-bold">
+          Tahmini Kâr: <span id="profitResult">0</span> ₺
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Montaj & Tasarım Notları</label>
+          <textarea id="notes" rows="2" placeholder="Zemin rengi, LED rengi, folyo türü vs..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Durum</label>
+            <select id="status" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white">
+              <option value="Bekliyor">⏳ Bekliyor</option>
+              <option value="Tasarımda">🎨 Tasarımda</option>
+              <option value="Baskıda">🖨️ Baskıda</option>
+              <option value="Montajda">🔨 Montajda</option>
+              <option value="Tamamlandı">✅ Tamamlandı</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Teslim Tarihi</label>
+            <input type="date" id="deadline" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-500 active:bg-amber-600 text-slate-950 font-black py-3.5 rounded-xl transition shadow-lg text-sm mt-2">
+          💾 İŞİ KAYDET
+        </button>
+      </form>
+    </section>
+
+    <!-- Kayıtlı İşler -->
+    <section class="space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <h2 class="text-sm font-bold text-slate-200">📋 KAYITLI İŞLER</h2>
+        <input type="text" id="search" oninput="renderJobs()" placeholder="Arama..." class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white w-36 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <div id="jobList" class="space-y-3"></div>
+    </section>
+
+  </main>
+
+  <script>
+    // Kalıcı Veritabanı Yapısı (IndexedDB)
+    let db;
+    let currentPhotoBase64 = null;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("ReklamciAjandasiDB", 1);
+        request.onupgradeneeded = (e) => {
+          db = e.target.result;
+          if (!db.objectStoreNames.contains("jobs")) {
+            db.createObjectStore("jobs", { keyPath: "id" });
+          }
+        };
+        request.onsuccess = (e) => {
+          db = e.target.result;
+          resolve(db);
+        };
+        request.onerror = (e) => reject(e);
+      });
+    }
+
+    async function getAllJobs() {
+      return new Promise((resolve) => {
+        const tx = db.transaction("jobs", "readonly");
+        const store = tx.objectStore("jobs");
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result.sort((a,b) => b.id - a.id));
+      });
+    }
+
+    async function saveJobToDB(job) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("jobs", "readwrite");
+        const store = tx.objectStore("jobs");
+        store.put(job);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    async function deleteJobFromDB(id) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("jobs", "readwrite");
+        const store = tx.objectStore("jobs");
+        store.delete(id);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    // Ölçü Satırı Yönetimi
+    function addDimensionRow(w = '', h = '', q = 1, label = '') {
+      const container = document.getElementById('dimensionRows');
+      const rowId = Date.now() + Math.random();
+      const div = document.createElement('div');
+      div.className = "grid grid-cols-12 gap-1.5 items-center dim-row";
+      div.dataset.id = rowId;
+      div.innerHTML = `
+        <input type="text" placeholder="Açıklama (Örn: Ön Cam)" class="col-span-4 dim-label bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="En" class="col-span-3 dim-w bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${w}">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="Boy" class="col-span-3 dim-h bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${h}">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="Adet" class="col-span-1 dim-q bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${q}">
+        <button type="button" onclick="this.parentElement.remove(); calculateTotalSqm();" class="col-span-1 text-rose-400 font-bold text-center">✕</button>
+      `;
+      container.appendChild(div);
+      calculateTotalSqm();
+    }
+
+    function calculateTotalSqm() {
+      const rows = document.querySelectorAll('.dim-row');
+      let totalSqm = 0;
+      rows.forEach(row => {
+        const w = parseFloat(row.querySelector('.dim-w').value) || 0;
+        const h = parseFloat(row.querySelector('.dim-h').value) || 0;
+        const q = parseFloat(row.querySelector('.dim-q').value) || 1;
+        totalSqm += (w * h * q) / 10000;
+      });
+      document.getElementById('totalSqmResult').innerText = totalSqm.toFixed(2);
+      return totalSqm.toFixed(2);
+    }
+
+    function calculateProfit() {
+      const cost = parseFloat(document.getElementById('cost').value) || 0;
+      const price = parseFloat(document.getElementById('price').value) || 0;
+      document.getElementById('profitResult').innerText = (price - cost).toLocaleString('tr-TR');
+    }
+
+    function handlePhotoSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          currentPhotoBase64 = evt.target.result;
+          document.getElementById('photoPreview').src = currentPhotoBase64;
+          document.getElementById('photoPreview').classList.remove('hidden');
+          document.getElementById('photoStatus').innerText = "Fotoğraf eklendi";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function saveJob(e) {
+      e.preventDefault();
+      
+      const rows = document.querySelectorAll('.dim-row');
+      const dimensions = [];
+      rows.forEach(row => {
+        dimensions.push({
+          label: row.querySelector('.dim-label').value || 'Parça',
+          w: parseFloat(row.querySelector('.dim-w').value) || 0,
+          h: parseFloat(row.querySelector('.dim-h').value) || 0,
+          q: parseFloat(row.querySelector('.dim-q').value) || 1
+        });
+      });
+
+      const newJob = {
+        id: Date.now(),
+        customer: document.getElementById('customer').value,
+        phone: document.getElementById('phone').value,
+        jobTitle: document.getElementById('jobTitle').value,
+        dimensions: dimensions,
+        totalSqm: calculateTotalSqm(),
+        cost: document.getElementById('cost').value,
+        price: document.getElementById('price').value,
+        notes: document.getElementById('notes').value,
+        status: document.getElementById('status').value,
+        deadline: document.getElementById('deadline').value,
+        photo: currentPhotoBase64
+      };
+
+      await saveJobToDB(newJob);
+      
+      // Sıfırla
+      document.getElementById('jobForm').reset();
+      document.getElementById('dimensionRows').innerHTML = '';
+      addDimensionRow();
+      currentPhotoBase64 = null;
+      document.getElementById('photoPreview').classList.add('hidden');
+      document.getElementById('photoStatus').innerText = "Fotoğraf seçilmedi";
+      document.getElementById('totalSqmResult').innerText = "0.00";
+      document.getElementById('profitResult').innerText = "0";
+
+      renderJobs();
+    }
+
+    async function deleteJob(id) {
+      if (confirm('Bu kayıt silinsin mi?')) {
+        await deleteJobFromDB(id);
+        renderJobs();
+      }
+    }
+
+    async function renderJobs() {
+      const jobs = await getAllJobs();
+      const query = document.getElementById('search').value.toLowerCase();
+      const listContainer = document.getElementById('jobList');
+      listContainer.innerHTML = '';
+
+      const filtered = jobs.filter(j => 
+        j.customer.toLowerCase().includes(query) || 
+        j.jobTitle.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-8 text-slate-600 text-xs">Kayıtlı iş bulunamadı.</div>`;
+        return;
+      }
+
+      filtered.forEach(job => {
+        const statusColors = {
+          'Bekliyor': 'bg-slate-800 text-slate-300 border-slate-700',
+          'Tasarımda': 'bg-purple-950/50 text-purple-300 border-purple-800',
+          'Baskıda': 'bg-blue-950/50 text-blue-300 border-blue-800',
+          'Montajda': 'bg-amber-950/50 text-amber-300 border-amber-800',
+          'Tamamlandı': 'bg-emerald-950/50 text-emerald-300 border-emerald-800'
+        };
+
+        let dimHTML = job.dimensions.map(d => 
+          `<div class="flex justify-between text-[11px] text-slate-300 border-b border-slate-800/40 py-1">
+             <span>${d.label}: ${d.w}x${d.h} cm (${d.q} Adet)</span>
+             <span class="font-bold text-amber-400">${((d.w*d.h*d.q)/10000).toFixed(2)} m²</span>
+           </div>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3 shadow-lg relative";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-white text-base">${job.customer}</h3>
+              <p class="text-xs text-amber-400 font-semibold">${job.jobTitle}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border ${statusColors[job.status] || 'bg-slate-800'}">
+              ${job.status}
+            </span>
+          </div>
+
+          ${job.phone ? `<div class="text-xs text-slate-400">📞 <a href="tel:${job.phone}" class="underline">${job.phone}</a></div>` : ''}
+
+          <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
+            <div class="text-[10px] text-slate-500 font-bold mb-1">PARÇA ÖLÇÜLERİ</div>
+            ${dimHTML}
+            <div class="text-right font-black text-amber-400 text-xs pt-1">Toplam: ${job.totalSqm} m²</div>
+          </div>
+
+          ${job.photo ? `<img src="${job.photo}" class="w-full h-36 object-cover rounded-xl border border-slate-800">` : ''}
+
+          <div class="flex justify-between items-center text-xs text-slate-300 bg-slate-950/50 p-2 rounded-xl">
+            <span>💰 Teklif: <strong class="text-emerald-400">${job.price || 0} ₺</strong></span>
+            <span>📅 ${job.deadline || 'Tarih yok'}</span>
+          </div>
+
+          ${job.notes ? `<p class="text-xs text-slate-400 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/50 italic">"${job.notes}"</p>` : ''}
+
+          <div class="flex justify-end pt-1">
+            <button onclick="deleteJob(${job.id})" class="text-xs text-rose-400 font-semibold px-2 py-1">Kayıt Sil</button>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    // Uygulama Başlatma
+    window.onload = async () => {
+      await initDB();
+      addDimensionRow();
+      renderJobs();
+    };
+  </script>
+</body>
+</html>
