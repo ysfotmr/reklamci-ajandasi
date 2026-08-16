@@ -1,21 +1,410 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Reklamcı Ajandası Pro</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reklamcı">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-12 font-sans select-none">
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBFGL0rMICUg70yOMkrne4kReVeB8Jy5HU",
-  authDomain: "reklamci-ajandasi.firebaseapp.com",
-  projectId: "reklamci-ajandasi",
-  storageBucket: "reklamci-ajandasi.firebasestorage.app",
-  messagingSenderId: "1030186120125",
-  appId: "1:1030186120125:web:8bfe02913ab415500298d4",
-  measurementId: "G-5JJT1HJDKB"
-};
+  <!-- Müşteri Takip Modu Ekranı (Linkle Açılırsa) -->
+  <div id="customerTrackView" class="hidden min-h-screen bg-slate-950 p-4 max-w-md mx-auto space-y-6">
+    <header class="text-center pt-6 space-y-1">
+      <h1 class="text-2xl font-black text-amber-500">📱 Müşteri İş Takip Paneli</h1>
+      <p class="text-xs text-slate-400">Siparişinizin anlık durumunu buradan takip edebilirsiniz.</p>
+    </header>
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    <div id="trackCard" class="bg-slate-900 rounded-3xl p-6 border border-slate-800 space-y-4 shadow-2xl">
+      <!-- Müşteri Detayları JS ile Buraya Gelecek -->
+    </div>
+  </div>
+
+  <!-- Yönetici Ekranı -->
+  <div id="adminView">
+    <!-- Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 p-4 sticky top-0 z-20">
+      <div class="max-w-md mx-auto flex justify-between items-center">
+        <div>
+          <h1 class="text-lg font-bold text-amber-500">📱 Reklamcı Ajandası Pro</h1>
+          <p class="text-[10px] text-slate-400">Canlı Senkronize • Bulut Tabanlı</p>
+        </div>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30">🔥 Bulut Canlı</span>
+      </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-5">
+
+      <!-- Form -->
+      <section class="bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl space-y-4">
+        <h2 class="text-sm font-bold text-slate-200 border-b border-slate-800 pb-2">➕ Yeni İş Kaydı</h2>
+        
+        <form id="jobForm" onsubmit="saveJob(event)" class="space-y-3">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Müşteri / Firma Adı</label>
+            <input type="text" id="customer" required placeholder="Örn: Emmioğlu Restoran" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Telefon</label>
+              <input type="tel" id="phone" placeholder="05xx..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">İş Türü</label>
+              <input type="text" id="jobTitle" required placeholder="Örn: Cam Folyosu & Tabela" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Çoklu Ölçü Ekleme -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-amber-400">📐 Cam / Parça Ölçüleri (cm)</span>
+              <button type="button" onclick="addDimensionRow()" class="text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-lg font-semibold active:bg-amber-500/40">+ Parça Ekle</button>
+            </div>
+            
+            <div id="dimensionRows" class="space-y-2"></div>
+
+            <div class="text-right text-xs font-extrabold text-amber-400 pt-1 border-t border-slate-800">
+              Toplam Alan: <span id="totalSqmResult" class="text-sm">0.00</span> m²
+            </div>
+          </div>
+
+          <!-- Fotoğraf -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">📷 Cephe / Saha Fotoğrafı</label>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)" class="hidden">
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="document.getElementById('photoInput').click()" class="bg-slate-800 border border-slate-700 text-xs px-3 py-2.5 rounded-xl font-medium text-slate-200 hover:bg-slate-700 active:bg-slate-600">
+                📸 Fotoğraf Çek / Seç
+              </button>
+              <span id="photoStatus" class="text-xs text-slate-400 italic">Fotoğraf seçilmedi</span>
+            </div>
+            <img id="photoPreview" class="mt-2 rounded-xl max-h-40 hidden border border-slate-700 object-cover w-full">
+          </div>
+
+          <!-- Teklif Fiyatı -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Teklif Fiyatı (₺)</label>
+            <input type="number" id="price" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Montaj & Tasarım Notları</label>
+            <textarea id="notes" rows="2" placeholder="Zemin rengi, LED rengi, folyo türü vs..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Durum</label>
+              <select id="status" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white">
+                <option value="Bekliyor">⏳ Bekliyor</option>
+                <option value="Tasarımda">🎨 Tasarımda</option>
+                <option value="Baskıda">🖨️ Baskıda</option>
+                <option value="Montajda">🔨 Montajda</option>
+                <option value="Tamamlandı">✅ Tamamlandı</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Teslim Tarihi</label>
+              <input type="date" id="deadline" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white">
+            </div>
+          </div>
+
+          <button type="submit" id="saveBtn" class="w-full bg-amber-500 active:bg-amber-600 text-slate-950 font-black py-3.5 rounded-xl transition shadow-lg text-sm mt-2">
+            💾 İŞİ KAYDET
+          </button>
+        </form>
+      </section>
+
+      <!-- Kayıtlı İşler -->
+      <section class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h2 class="text-sm font-bold text-slate-200">📋 KAYITLI İŞLER</h2>
+          <input type="text" id="search" oninput="renderJobs()" placeholder="Arama..." class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white w-36 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div id="jobList" class="space-y-3"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Firebase SDK Entegrasyonu -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFGL0rMICUg70yOMkrne4kReVeB8Jy5HU",
+      authDomain: "reklamci-ajandasi.firebaseapp.com",
+      projectId: "reklamci-ajandasi",
+      storageBucket: "reklamci-ajandasi.firebasestorage.app",
+      messagingSenderId: "1030186120125",
+      appId: "1:1030186120125:web:8bfe02913ab415500298d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const jobsCol = collection(db, "jobs");
+
+    let allJobs = [];
+    let currentPhotoBase64 = null;
+
+    // URL'de takip kodu var mı kontrolü (Müşteri Takip Modu)
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackId = urlParams.get('takip');
+
+    if (trackId) {
+      document.getElementById('adminView').classList.add('hidden');
+      document.getElementById('customerTrackView').classList.remove('hidden');
+      loadTrackData(trackId);
+    } else {
+      // Canlı Veri Dinleyici (Firebase Realtime)
+      onSnapshot(jobsCol, (snapshot) => {
+        allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        allJobs.sort((a,b) => b.createdAt - a.createdAt);
+        renderJobs();
+      });
+    }
+
+    async function loadTrackData(id) {
+      const docRef = doc(db, "jobs", id);
+      const docSnap = await getDoc(docRef);
+      const container = document.getElementById('trackCard');
+
+      if (docSnap.exists()) {
+        const job = docSnap.data();
+        const statusColors = {
+          'Bekliyor': 'bg-slate-800 text-slate-300 border-slate-700',
+          'Tasarımda': 'bg-purple-950 text-purple-300 border-purple-800',
+          'Baskıda': 'bg-blue-950 text-blue-300 border-blue-800',
+          'Montajda': 'bg-amber-950 text-amber-300 border-amber-800',
+          'Tamamlandı': 'bg-emerald-950 text-emerald-300 border-emerald-800'
+        };
+
+        let dimHTML = job.dimensions.map(d => 
+          `<div class="flex justify-between text-xs text-slate-300 border-b border-slate-800/60 py-1.5">
+             <span>${d.label}: ${d.w}x${d.h} cm (${d.q} Adet)</span>
+             <span class="font-bold text-amber-400">${((d.w*d.h*d.q)/10000).toFixed(2)} m²</span>
+           </div>`
+        ).join('');
+
+        container.innerHTML = `
+          <div class="text-center pb-2 border-b border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">MÜŞTERİ / FİRMA</span>
+            <h2 class="text-xl font-bold text-white">${job.customer}</h2>
+            <p class="text-xs text-amber-400 font-medium">${job.jobTitle}</p>
+          </div>
+
+          <div class="text-center py-3 rounded-2xl border ${statusColors[job.status] || 'bg-slate-800'}">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">SİPARİŞ DURUMU</span>
+            <span class="text-base font-black">${job.status}</span>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-1">
+            <div class="text-[10px] text-slate-500 font-bold mb-1">ÖLÇÜ DETAYLARI</div>
+            ${dimHTML}
+            <div class="text-right font-black text-amber-400 text-xs pt-1">Toplam: ${job.totalSqm} m²</div>
+          </div>
+
+          ${job.photo ? `<img src="${job.photo}" class="w-full h-44 object-cover rounded-xl border border-slate-800">` : ''}
+
+          <div class="text-center text-xs text-slate-400 pt-2 border-t border-slate-800">
+            📅 Tahmini Teslim: <strong class="text-slate-200">${job.deadline || 'Belirtilmedi'}</strong>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `<div class="text-center text-rose-400 text-xs py-8">Kayıtlı sipariş bulunamadı.</div>`;
+      }
+    }
+
+    // Ölçü Satır Yönetimi
+    window.addDimensionRow = function(w = '', h = '', q = 1) {
+      const container = document.getElementById('dimensionRows');
+      const div = document.createElement('div');
+      div.className = "grid grid-cols-12 gap-1.5 items-center dim-row";
+      div.innerHTML = `
+        <input type="text" placeholder="Açıklama" class="col-span-4 dim-label bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="En" class="col-span-3 dim-w bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${w}">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="Boy" class="col-span-3 dim-h bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${h}">
+        <input type="number" oninput="calculateTotalSqm()" placeholder="Adet" class="col-span-1 dim-q bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white text-center" value="${q}">
+        <button type="button" onclick="this.parentElement.remove(); calculateTotalSqm();" class="col-span-1 text-rose-400 font-bold text-center">✕</button>
+      `;
+      container.appendChild(div);
+      calculateTotalSqm();
+    };
+
+    window.calculateTotalSqm = function() {
+      const rows = document.querySelectorAll('.dim-row');
+      let totalSqm = 0;
+      rows.forEach(row => {
+        const w = parseFloat(row.querySelector('.dim-w').value) || 0;
+        const h = parseFloat(row.querySelector('.dim-h').value) || 0;
+        const q = parseFloat(row.querySelector('.dim-q').value) || 1;
+        totalSqm += (w * h * q) / 10000;
+      });
+      document.getElementById('totalSqmResult').innerText = totalSqm.toFixed(2);
+      return totalSqm.toFixed(2);
+    };
+
+    window.handlePhotoSelect = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          currentPhotoBase64 = evt.target.result;
+          document.getElementById('photoPreview').src = currentPhotoBase64;
+          document.getElementById('photoPreview').classList.remove('hidden');
+          document.getElementById('photoStatus').innerText = "Fotoğraf eklendi";
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.saveJob = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      btn.innerText = "KAYDEDİLİYOR...";
+      btn.disabled = true;
+
+      const rows = document.querySelectorAll('.dim-row');
+      const dimensions = [];
+      rows.forEach(row => {
+        dimensions.push({
+          label: row.querySelector('.dim-label').value || 'Parça',
+          w: parseFloat(row.querySelector('.dim-w').value) || 0,
+          h: parseFloat(row.querySelector('.dim-h').value) || 0,
+          q: parseFloat(row.querySelector('.dim-q').value) || 1
+        });
+      });
+
+      const newJob = {
+        customer: document.getElementById('customer').value,
+        phone: document.getElementById('phone').value,
+        jobTitle: document.getElementById('jobTitle').value,
+        dimensions: dimensions,
+        totalSqm: calculateTotalSqm(),
+        price: document.getElementById('price').value,
+        notes: document.getElementById('notes').value,
+        status: document.getElementById('status').value,
+        deadline: document.getElementById('deadline').value,
+        photo: currentPhotoBase64,
+        createdAt: Date.now()
+      };
+
+      await addDoc(jobsCol, newJob);
+
+      document.getElementById('jobForm').reset();
+      document.getElementById('dimensionRows').innerHTML = '';
+      addDimensionRow();
+      currentPhotoBase64 = null;
+      document.getElementById('photoPreview').classList.add('hidden');
+      document.getElementById('photoStatus').innerText = "Fotoğraf seçilmedi";
+      document.getElementById('totalSqmResult').innerText = "0.00";
+      
+      btn.innerText = "💾 İŞİ KAYDET";
+      btn.disabled = false;
+    };
+
+    window.deleteJob = async function(id) {
+      if (confirm('Bu iş kaydı kalıcı olarak silinsin mi?')) {
+        await deleteDoc(doc(db, "jobs", id));
+      }
+    };
+
+    window.updateStatus = async function(id, newStatus) {
+      await updateDoc(doc(db, "jobs", id), { status: newStatus });
+    };
+
+    window.copyTrackLink = function(id) {
+      const link = `${window.location.origin}${window.location.pathname}?takip=${id}`;
+      navigator.clipboard.writeText(link);
+      alert('Müşteri Takip Bağlantısı Kopyalandı!\nMüşterinize WhatsApp\'tan gönderebilirsiniz.');
+    };
+
+    window.renderJobs = function() {
+      const query = document.getElementById('search').value.toLowerCase();
+      const listContainer = document.getElementById('jobList');
+      listContainer.innerHTML = '';
+
+      const filtered = allJobs.filter(j => 
+        j.customer.toLowerCase().includes(query) || 
+        j.jobTitle.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-8 text-slate-600 text-xs">Kayıtlı iş bulunamadı.</div>`;
+        return;
+      }
+
+      filtered.forEach(job => {
+        let dimHTML = job.dimensions.map(d => 
+          `<div class="flex justify-between text-[11px] text-slate-300 border-b border-slate-800/40 py-1">
+             <span>${d.label}: ${d.w}x${d.h} cm (${d.q} Adet)</span>
+             <span class="font-bold text-amber-400">${((d.w*d.h*d.q)/10000).toFixed(2)} m²</span>
+           </div>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3 shadow-lg relative";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-white text-base">${job.customer}</h3>
+              <p class="text-xs text-amber-400 font-semibold">${job.jobTitle}</p>
+            </div>
+            <select onchange="updateStatus('${job.id}', this.value)" class="bg-slate-950 border border-slate-800 text-[11px] font-bold px-2 py-1 rounded-xl text-amber-400">
+              <option value="Bekliyor" ${job.status === 'Bekliyor' ? 'selected' : ''}>⏳ Bekliyor</option>
+              <option value="Tasarımda" ${job.status === 'Tasarımda' ? 'selected' : ''}>🎨 Tasarımda</option>
+              <option value="Baskıda" ${job.status === 'Baskıda' ? 'selected' : ''}>🖨️ Baskıda</option>
+              <option value="Montajda" ${job.status === 'Montajda' ? 'selected' : ''}>🔨 Montajda</option>
+              <option value="Tamamlandı" ${job.status === 'Tamamlandı' ? 'selected' : ''}>✅ Tamamlandı</option>
+            </select>
+          </div>
+
+          ${job.phone ? `<div class="text-xs text-slate-400">📞 <a href="tel:${job.phone}" class="underline">${job.phone}</a></div>` : ''}
+
+          <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
+            <div class="text-[10px] text-slate-500 font-bold mb-1">PARÇA ÖLÇÜLERİ</div>
+            ${dimHTML}
+            <div class="text-right font-black text-amber-400 text-xs pt-1">Toplam: ${job.totalSqm} m²</div>
+          </div>
+
+          ${job.photo ? `<img src="${job.photo}" class="w-full h-36 object-cover rounded-xl border border-slate-800">` : ''}
+
+          <div class="flex justify-between items-center text-xs text-slate-300 bg-slate-950/50 p-2 rounded-xl">
+            <span>💰 Teklif: <strong class="text-emerald-400">${job.price || 0} ₺</strong></span>
+            <span>📅 ${job.deadline || 'Tarih yok'}</span>
+          </div>
+
+          ${job.notes ? `<p class="text-xs text-slate-400 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/50 italic">"${job.notes}"</p>` : ''}
+
+          <div class="flex justify-between items-center pt-1 border-t border-slate-800/50">
+            <button onclick="copyTrackLink('${job.id}')" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1">
+              🔗 Müşteri Takip Linki Al
+            </button>
+            <button onclick="deleteJob('${job.id}')" class="text-xs text-rose-400 font-semibold px-2 py-1">Kayıt Sil</button>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    };
+
+    window.onload = () => {
+      if (!trackId) addDimensionRow();
+    };
+  </script>
+</body>
+</html>
